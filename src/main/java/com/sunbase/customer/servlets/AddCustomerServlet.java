@@ -18,8 +18,7 @@ public class AddCustomerServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Get customer details from the request
-    	
-    	String uuid = request.getParameter("uuid");
+        String uuid = request.getParameter("uuid");
         String firstName = request.getParameter("firstName");
         String lastName = request.getParameter("lastName");
         String street = request.getParameter("street");
@@ -29,39 +28,69 @@ public class AddCustomerServlet extends HttpServlet {
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
 
-        // Parse phone as an integer
-       
-
         // Create a Customers object with the collected details
-        Customers newCustomer = new Customers( uuid, firstName, lastName, street, address, city, state, email, phone);
+        Customers newCustomer = new Customers(uuid, firstName, lastName, street, address, city, state, email, phone);
 
         // Create an instance of CustomerDAO
         CustomerDAO customerDAO = new CustomerDAOImpl();
 
-        // Try to add the new customer
-        int rowsAffected = customerDAO.addCustomer(newCustomer);
+        // Check if customer with given UUID already exists
+        Customers existingCustomer = customerDAO.getCustomerById(uuid);
 
-        // Call getAllCustomers to update the customer list
-        List<Customers> updatedCustomersList = customerDAO.getAllCustomers();
+        if (existingCustomer != null) {
+            // If customer exists, update the customer
+            int rowsAffected = customerDAO.updateCustomer(newCustomer);
 
-        // Set the updated customer list in the request
-        request.setAttribute("searchResults", updatedCustomersList);
+            if (rowsAffected > 0)
+            {
+            	
+            	// Call getAllCustomers to update the customer list
+                List<Customers> updatedCustomersList = customerDAO.getAllCustomers();
 
-        // Redirect to home.jsp with a pop-up message based on the result
-        if (rowsAffected > 0) {
-            // Customer added successfully, redirect to home.jsp with success message
-            //response.sendRedirect("home.jsp?successMessage=Customer added successfully");
-            request.getRequestDispatcher("home.jsp?successMessage=Customer added successfully").forward(request, response);
-        } else {
-            // Customer not added, redirect back to addcustomer.jsp with details pre-filled
-            response.sendRedirect("addcustomer.jsp?success=false&firstName=" + firstName +
-                    "&lastName=" + lastName +
-                    "&street=" + street +
-                    "&address=" + address +
-                    "&city=" + city +
-                    "&state=" + state +
-                    "&email=" + email +
-                    "&phone=" + phone);
+                // Set the updated customer list in the request
+                request.setAttribute("searchResults", updatedCustomersList);
+
+                // Customer updated successfully, redirect to home.jsp with success message
+                request.getRequestDispatcher("home.jsp?successMessage=Customer updated successfully").forward(request, response);
+            }
+            else
+            {
+            	
+            	// Call getAllCustomers to update the customer list
+                List<Customers> updatedCustomersList = customerDAO.getAllCustomers();
+
+                // Set the updated customer list in the request
+                request.setAttribute("searchResults", updatedCustomersList);
+
+                // Customer not updated, redirect back to home.jsp with error message
+                response.sendRedirect("home.jsp?errorMessage=Failed to update customer");
+            }
+        }
+        else
+        {
+            // If customer does not exist, add the new customer
+            int rowsAffected = customerDAO.addCustomer(newCustomer);
+
+            // Call getAllCustomers to update the customer list
+            List<Customers> updatedCustomersList = customerDAO.getAllCustomers();
+
+            // Set the updated customer list in the request
+            request.setAttribute("searchResults", updatedCustomersList);
+
+            if (rowsAffected > 0) {
+                // Customer added successfully, redirect to home.jsp with success message
+                request.getRequestDispatcher("home.jsp?successMessage=Customer added successfully").forward(request, response);
+            } else {
+                // Customer not added, redirect back to addcustomer.jsp with details pre-filled
+                response.sendRedirect("addcustomer.jsp?success=false&firstName=" + firstName +
+                        "&lastName=" + lastName +
+                        "&street=" + street +
+                        "&address=" + address +
+                        "&city=" + city +
+                        "&state=" + state +
+                        "&email=" + email +
+                        "&phone=" + phone);
+            }
         }
     }
 }
