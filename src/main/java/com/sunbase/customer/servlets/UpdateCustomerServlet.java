@@ -47,13 +47,13 @@ public class UpdateCustomerServlet extends HttpServlet {
                 // Update failed
                 request.setAttribute("errorMessage", "Update failed");
             }
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            // Handle the case where parsing the customer ID fails
-            request.setAttribute("errorMessage", "Invalid customer ID");
+            // Handle any other exceptions here
+            request.setAttribute("errorMessage", "Error occurred while updating customer");
         }
 
-        // Get the updated customer list outside the if-else block
+        // Get the updated customer list
         List<Customers> updatedCustomersList = customerDAO.getAllCustomers();
 
         // Set the updated customer list in the request
