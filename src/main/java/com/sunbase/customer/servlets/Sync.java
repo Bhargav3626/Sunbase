@@ -1,6 +1,7 @@
 package com.sunbase.customer.servlets;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -49,11 +50,33 @@ public class Sync extends HttpServlet {
 				String phone = jsonObject.getString("phone");
 
 				Customers c = new Customers(uuid, first_name, last_name, street, address, city, state, email, phone);
-				cimpl.addCustomer(c);
+				Customers existingCustomer = cimpl.getCustomerById(uuid);
+				if(existingCustomer!=null)
+				{
+					int rowsAffected = cimpl.updateCustomer(c);
+					if (rowsAffected > 0)
+		            {
+		            	
+		            	// Call getAllCustomers to update the customer list
+		                List<Customers> updatedCustomersList = cimpl.getAllCustomers();
+
+		                // Set the updated customer list in the request
+		                req.setAttribute("searchResults", updatedCustomersList);
+
+		                // Customer updated successfully, redirect to home.jsp with success message
+		                req.getRequestDispatcher("home.jsp?successMessage=Customer updated successfully").forward(req, resp);
+		                return;
+		            }
+				}
+				else
+				{
+					cimpl.addCustomer(c);
+					req.getRequestDispatcher("HomeServlet").forward(req, resp);
+				}
+
 
 			}
-			req.setAttribute("message", "Customers Synced Successfully. ");
-			req.getRequestDispatcher("HomeServlet").forward(req, resp);
+			//req.setAttribute("message", "Customers Synced Successfully. ");
 
 		}
 	}
