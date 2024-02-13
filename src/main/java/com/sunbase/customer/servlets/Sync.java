@@ -34,7 +34,8 @@ public class Sync extends HttpServlet {
 		String token = (String) session.getAttribute("adminUsername");
 		
 		 JSONArray listArray = clist.getCustomerListArray(token);
-		if (listArray != null) {
+		 System.out.println(listArray);
+		if (listArray != null && !listArray.isEmpty()) {
 			for (int i = 0; i < listArray.length(); i++) {
 				JSONObject jsonObject = listArray.getJSONObject(i);
 				
@@ -72,12 +73,18 @@ public class Sync extends HttpServlet {
 				{
 					cimpl.addCustomer(c);
 					req.getRequestDispatcher("HomeServlet").forward(req, resp);
+					return;
 				}
 
 
 			}
 			//req.setAttribute("message", "Customers Synced Successfully. ");
 
+		}
+		else
+		{
+			System.err.println("no response");
+			req.getRequestDispatcher("HomeServlet").forward(req, resp);
 		}
 	}
 
