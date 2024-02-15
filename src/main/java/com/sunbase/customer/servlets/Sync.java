@@ -27,7 +27,6 @@ public class Sync extends HttpServlet {
 		 clist = new CustomerList();
 		 cimpl = new CustomerDAOImpl();
 	}
-
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		HttpSession session = req.getSession();
@@ -36,9 +35,9 @@ public class Sync extends HttpServlet {
 		 JSONArray listArray = clist.getCustomerListArray(token);
 		 System.out.println(listArray);
 		if (listArray != null && !listArray.isEmpty()) {
+			System.out.println("inside");
 			for (int i = 0; i < listArray.length(); i++) {
 				JSONObject jsonObject = listArray.getJSONObject(i);
-				
 				
 				String uuid = jsonObject.getString("uuid");
 				String first_name = jsonObject.getString("first_name");
@@ -55,37 +54,26 @@ public class Sync extends HttpServlet {
 				if(existingCustomer!=null)
 				{
 					int rowsAffected = cimpl.updateCustomer(c);
-					if (rowsAffected > 0)
-		            {
-		            	
-		            	// Call getAllCustomers to update the customer list
-		                List<Customers> updatedCustomersList = cimpl.getAllCustomers();
-
-		                // Set the updated customer list in the request
-		                req.setAttribute("searchResults", updatedCustomersList);
-
-		                // Customer updated successfully, redirect to home.jsp with success message
-		                req.getRequestDispatcher("home.jsp?successMessage=Customer updated successfully").forward(req, resp);
-		                return;
-		            }
+//					if (rowsAffected > 0)
+//		            {
+//		            	// Call getAllCustomers to update the customer list
+//		                List<Customers> updatedCustomersList = cimpl.getAllCustomers();
+//		                // Set the updated customer list in the request
+//		                req.setAttribute("searchResults", updatedCustomersList);
+//		                // Customer updated successfully, redirect to home.jsp with success message
+//		                req.getRequestDispatcher("home.jsp?successMessage=Customer updated successfully").forward(req, resp);
+//		            }
 				}
 				else
 				{
 					cimpl.addCustomer(c);
-					req.getRequestDispatcher("HomeServlet").forward(req, resp);
-					return;
+					//req.getRequestDispatcher("HomeServlet").forward(req, resp);
 				}
-
-
 			}
-			//req.setAttribute("message", "Customers Synced Successfully. ");
-
 		}
-		else
-		{
-			System.err.println("no response");
+		
 			req.getRequestDispatcher("HomeServlet").forward(req, resp);
-		}
+		
 	}
 
 }
